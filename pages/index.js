@@ -41,7 +41,7 @@ export default function Home() {
           <div style={styles.authorBadge} aria-label="Autor do projeto">
             <strong>Desenvolvido por:</strong> Eliane Rodrigues Martins
           </div>
-          <p style={styles.subAuthor}>Faculdade: UNIVESP - POLO LENÇÓIS PAULISTA-SP / Disciplina: Projeto Integrador III / Curso: Tecnologia da Informação / Ano: 2026</p>
+          <p style={styles.subAuthor}>Faculdade: UNIVESP - Polo: Lençóis Paulista-SP / Disciplina: Projeto Integrador III / Curso: Tecnologia da Informação / Ano: 2026</p>
         </header>
 
         {/* CARD DE CLIMA */}
