@@ -73,7 +73,7 @@ export default function Home() {
         <footer style={styles.footer}>
           <div style={styles.divider}></div>
           <p style={styles.footerText}><strong>Projeto Acadêmico - Sistema de Software Completo</strong></p>
-          <p style={styles.footerText}>© 2024 - SEU NOME COMPLETO</p>
+          <p style={styles.footerText}>© 2026 - Eliane Rodrigues Martins | RA: 23210244</p>
           <p style={styles.footerText}>Stack: Next.js • JavaScript • Supabase Cloud • Vercel CI/CD</p>
           <div style={styles.a11yBadge}>♿ Acessibilidade WCAG Ativa</div>
         </footer>
