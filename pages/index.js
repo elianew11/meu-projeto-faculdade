@@ -15,7 +15,7 @@ export default function Home() {
     async function carregarTudo() {
       // 1. Busca Clima (API Externa) - Usando uma API que só manda números
       try {
-        const res = await fetch('https://api.open-meteo.com/v1/forecast?latitude=-23.54&longitude=-46.63&current_weather=true');
+        const res = await fetch('https://api.open-meteo.com/v1/forecast?latitude=-22.60&longitude=-48.80&current_weather=true');
         const json = await res.json();
         setClima(json.current_weather.temperature + "°C em São Paulo");
       } catch (e) {
