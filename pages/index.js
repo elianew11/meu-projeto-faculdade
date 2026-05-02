@@ -13,11 +13,12 @@ export default function Home() {
 
   useEffect(() => {
     async function carregarTudo() {
-      // 1. Busca Clima (API Externa) - Usando uma API que só manda números
+      // 1. Busca Clima de Lençóis Paulista (Latitude -22.60, Longitude -48.80)
       try {
         const res = await fetch('https://api.open-meteo.com/v1/forecast?latitude=-22.60&longitude=-48.80&current_weather=true');
         const json = await res.json();
-        setClima(json.current_weather.temperature + "°C em São Paulo");
+        // Atualizei o texto para mostrar o nome da sua cidade
+        setClima(json.current_weather.temperature + "°C em Lençóis Paulista");
       } catch (e) {
         setClima("Clima indisponível");
       }
@@ -29,13 +30,12 @@ export default function Home() {
         setDados(data || []);
         setStatusBanco("Conectado");
       } catch (e) {
-        console.error(e);
-        setStatusBanco("Erro na conexão (Verifique as chaves na Vercel)");
+        setStatusBanco("Erro na conexão");
       }
     }
     carregarTudo();
   }, []);
-
+  
   return (
     <div style={styles.body}>
       <main style={styles.container}>
