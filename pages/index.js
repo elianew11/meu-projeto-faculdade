@@ -1,10 +1,13 @@
 import { useState, useEffect } from 'react';
 import { createClient } from '@supabase/supabase-js';
 
-// Conexão com o Banco de Dados (Você vai preencher as chaves abaixo)
-const supabase = createClient('SUA_URL_DO_SUPABASE', 'SUA_CHAVE_ANON_DO_SUPABASE');
+// Agora o sistema pega as chaves automaticamente da configuração da Vercel
+const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
+const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+const supabase = createClient(supabaseUrl, supabaseAnonKey);
 
 export default function Home() {
+  // ... o restante do código que te passei antes continua igual
   const [dados, setDados] = useState([]);
   const [clima, setClima] = useState("Carregando...");
 
