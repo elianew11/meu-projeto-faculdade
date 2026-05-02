@@ -1,61 +1,90 @@
 import { useState, useEffect } from 'react';
 import { createClient } from '@supabase/supabase-js';
 
-// Conexão com o Banco
-const supabase = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL || '', 
-  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || ''
-);
+// Conexão segura com o banco
+const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || '';
+const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || '';
+const supabase = createClient(supabaseUrl, supabaseAnonKey);
 
 export default function Home() {
   const [dados, setDados] = useState([]);
-  const [clima, setClima] = useState("☀️ 27°C"); // Valor padrão caso a API falhe
+  const [clima, setClima] = useState("Carregando clima...");
+  const [statusBanco, setStatusBanco] = useState("Verificando...");
 
   useEffect(() => {
-    async function fetchData() {
-      // Busca dados do Supabase
-      const { data } = await supabase.from('tarefas').select('*');
-      if (data) setDados(data);
-      
-      // Busca Clima (Uso de API)
+    async function carregarTudo() {
+      // 1. Busca Clima (API Externa) - Usando uma API que só manda números
       try {
-        const res = await fetch('https://wttr.in/Sao+Paulo?format=1');
-        const text = await res.text();
-        if (text) setClima(text);
-      } catch (e) { console.log("Erro API clima"); }
+        const res = await fetch('https://api.open-meteo.com/v1/forecast?latitude=-23.54&longitude=-46.63&current_weather=true');
+        const json = await res.json();
+        setClima(json.current_weather.temperature + "°C em São Paulo");
+      } catch (e) {
+        setClima("Clima indisponível");
+      }
+
+      // 2. Busca Dados (Supabase)
+      try {
+        const { data, error } = await supabase.from('tarefas').select('*');
+        if (error) throw error;
+        setDados(data || []);
+        setStatusBanco("Conectado");
+      } catch (e) {
+        console.error(e);
+        setStatusBanco("Erro na conexão (Verifique as chaves na Vercel)");
+      }
     }
-    fetchData();
+    carregarTudo();
   }, []);
 
   return (
-    <div style={{ backgroundColor: '#0f172a', color: 'white', minHeight: '100vh', fontFamily: 'sans-serif', padding: '40px' }}>
-      <main style={{ maxWidth: '600px', margin: '0 auto', background: '#1e293b', padding: '30px', borderRadius: '20px', boxShadow: '0 20px 50px rgba(0,0,0,0.5)' }}>
-        <h1 style={{ color: '#38bdf8', textAlign: 'center' }}>EcoMonitor Dashboard</h1>
-        
-        <div style={{ background: '#334155', padding: '20px', borderRadius: '15px', marginBottom: '20px', textAlign: 'center' }}>
-          <h2 style={{ fontSize: '1rem', color: '#94a3b8', margin: 0 }}>CLIMA ATUAL (API)</h2>
-          <p style={{ fontSize: '2.5rem', margin: '10px 0' }}>{clima}</p>
-        </div>
+    <div style={styles.body}>
+      <main style={styles.container}>
+        <header style={styles.header}>
+          <h1 style={styles.title}>Sistema de Gestão EcoMonitor</h1>
+          <p style={styles.badge}>Hospedado na Nuvem (Vercel)</p>
+        </header>
 
-        <div style={{ background: 'white', color: '#1e293b', padding: '20px', borderRadius: '15px' }}>
-          <h2 style={{ fontSize: '1.2rem', borderBottom: '2px solid #f1f5f9', paddingBottom: '10px' }}>📋 Tarefas no Banco de Dados</h2>
-          <ul style={{ listStyle: 'none', padding: 0 }}>
+        <section style={styles.cardClima}>
+          <h2 style={styles.cardLabel}>🌤️ INFORMAÇÃO DA API</h2>
+          <p style={styles.temp}>{clima}</p>
+        </section>
+
+        <section style={styles.cardBanco}>
+          <h2 style={styles.cardLabel}>🗄️ DADOS DO BANCO (SUPABASE)</h2>
+          <p style={{fontSize: '0.8rem', color: statusBanco === "Conectado" ? "green" : "red"}}>Status: {statusBanco}</p>
+          
+          <div style={styles.lista}>
             {dados.length > 0 ? dados.map(item => (
-              <li key={item.id} style={{ padding: '10px 0', borderBottom: '1px solid #eee', display: 'flex', justifyContent: 'space-between' }}>
+              <div key={item.id} style={styles.item}>
                 <span>{item.titulo}</span>
-                <strong style={{ color: item.concluido ? 'green' : 'orange' }}>
-                  {item.concluido ? '✓ OK' : '...'}
-                </strong>
-              </li>
-            )) : <p style={{ color: '#666' }}>Conectando ao Supabase...</p>}
-          </ul>
-        </div>
+                <span>{item.concluido ? "✅" : "⏳"}</span>
+              </div>
+            )) : (
+              <p style={{color: '#666', textAlign: 'center'}}>Nenhum dado encontrado ou configurando chaves...</p>
+            )}
+          </div>
+        </section>
 
-        <footer style={{ marginTop: '30px', fontSize: '0.8rem', color: '#64748b', textAlign: 'center' }}>
-          <p>Acessibilidade: Cores de Alto Contraste Ativas</p>
-          <p>Infraestrutura: Nuvem Vercel & GitHub CI/CD</p>
+        <footer style={styles.footer}>
+          <p>♿ Acessibilidade: Alto contraste e Tags Semânticas</p>
+          <p>🔄 CI/CD: Atualização automática via GitHub Actions</p>
         </footer>
       </main>
     </div>
   );
 }
+
+const styles = {
+  body: { backgroundColor: '#f0f2f5', minHeight: '100vh', padding: '20px', fontFamily: 'Arial, sans-serif' },
+  container: { maxWidth: '500px', margin: '0 auto' },
+  header: { textAlign: 'center', marginBottom: '20px' },
+  title: { color: '#1a73e8', marginBottom: '5px' },
+  badge: { fontSize: '0.8rem', color: '#666', background: '#e8f0fe', display: 'inline-block', padding: '2px 10px', borderRadius: '10px' },
+  cardClima: { background: '#ffffff', padding: '20px', borderRadius: '12px', boxShadow: '0 2px 10px rgba(0,0,0,0.1)', marginBottom: '15px', textAlign: 'center' },
+  cardBanco: { background: '#ffffff', padding: '20px', borderRadius: '12px', boxShadow: '0 2px 10px rgba(0,0,0,0.1)' },
+  cardLabel: { fontSize: '0.7rem', color: '#999', letterSpacing: '1px', marginBottom: '10px' },
+  temp: { fontSize: '2rem', fontWeight: 'bold', color: '#333', margin: 0 },
+  lista: { marginTop: '15px', borderTop: '1px solid #eee', paddingTop: '10px' },
+  item: { display: 'flex', justifyContent: 'space-between', padding: '8px 0', borderBottom: '1px solid #f9f9f9' },
+  footer: { marginTop: '30px', textAlign: 'center', fontSize: '0.7rem', color: '#999', lineHeight: '1.5' }
+};
